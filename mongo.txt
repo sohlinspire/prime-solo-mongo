@@ -1,0 +1,75 @@
+//1) Create a collection named orders.
+db.createCollection('orders')
+
+//2) Insert at least 3 documents that represent an order. IMPORTANT: See section below for fields. Order dates should be: 2017-02-03, 2017-04-04, 2017-01-02
+db.orders.insert({ name: "stuff1", orderDate: new Date('2017-02-03'), orderTotal: "60", lineItem: "socks" })
+db.orders.insert({ name: "stuff2", orderDate: new Date('2017-04-04'), orderTotal: "57", lineItem: "books" })
+db.orders.insert({ name: "stuff3", orderDate: new Date('2017-01-02'), orderTotal: "100", lineItem: "fossils" })
+
+//3) Find all orders and make them look pretty.
+> db.orders.find().pretty()
+{
+	"_id" : ObjectId("5970fdf7f41d78ae3ee61e10"),
+	"name" : "stuff1",
+	"orderTotal" : 60,
+	"lineItem" : "socks",
+	"orderDate" : ISODate("2017-02-03T00:00:00Z")
+}
+{
+	"_id" : ObjectId("5970fe24f41d78ae3ee61e11"),
+	"name" : "stuff2",
+	"orderTotal" : "57",
+	"lineItem" : {
+		"unitPrice" : 6,
+		"quantity" : 4,
+		"productName" : "books"
+	},
+	"orderDate" : ISODate("2017-04-04T00:00:00Z")
+}
+{
+	"_id" : ObjectId("5970fe3ff41d78ae3ee61e12"),
+	"name" : "stuff3",
+	"orderTotal" : "100",
+	"lineItem" : "fossils",
+	"orderDate" : ISODate("2017-01-02T00:00:00Z")
+}
+
+//4) Find all orders with an orderDate that is after 1/31/2017.
+> db.orders.find({orderDate: {$gt: new Date('2017-01-31')}})
+{ "_id" : ObjectId("5970fab2f41d78ae3ee61e0d"), "name" : "stuff1", "orderDate" : ISODate("2017-02-03T00:00:00Z") }
+{ "_id" : ObjectId("5970fafef41d78ae3ee61e0e"), "name" : "stuff2", "orderDate" : ISODate("2017-04-04T00:00:00Z") }
+
+//5) Change the orderTotal from 2/3/2017 to 63 dollars (you do NOT have to ensure the lineItems' unitPrice * quantity add up to the orderTotal)
+> db.orders.update({name: "stuff1"}, {$set: {orderTotal: 63}});
+{
+	"_id" : ObjectId("5970fdf7f41d78ae3ee61e10"),
+	"name" : "stuff1",
+	"orderTotal" : 63,
+	"lineItem" : "socks",
+	"orderDate" : ISODate("2017-02-03T00:00:00Z")
+}
+
+//6) Add another lineItem to the order from 4/4/2017
+> db.orders.update({name: "stuff2"}, {$push: {lineItem: {unitColor:'black'}}})
+{
+	"_id" : ObjectId("5970fe24f41d78ae3ee61e11"),
+	"name" : "stuff2",
+	"orderTotal" : "57",
+	"lineItem" : [
+		{
+			"unitPrice" : 6,
+			"quantity" : 4,
+			"productName" : "books"
+		},
+		{
+			"unitColor" : "black"
+		}
+	],
+	"orderDate" : ISODate("2017-04-04T00:00:00Z")
+}
+
+//7) Change the first lineItem in the order from 1/2/2017 to be for 2 'transistor radio's
+> db.orders.update({name: "stuff2"}, {$set: {lineItem.0.productName:'transistor radio'}}})
+
+
+//8)Find orders with lineItems that have a quantity that is less than 10, but greater than 2. You will have to research $and
